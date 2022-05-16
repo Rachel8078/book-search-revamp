@@ -17,7 +17,7 @@ const resolvers = {
     }
     throw new AuthenticationError('Not logged in');
   },
-  
+
     // get all users
     users: async () => {
       return User.find()
@@ -57,10 +57,21 @@ const resolvers = {
 
       const token = signToken(user);
       return { token, user };
+    },
+    addSavedBook: async (parent, {userId, title }, context) =>{
+      if(context.user) {
+        const savedBook = await User.findOneAndUpdate(
+          { _id: userId },
+          { $push: { savedBooks: { title, username: context.user.username}}},
+          { new: true, runValidators: true }
+        );
+
+        return updatedUser;
+      }
+
+      throw new AuthenticationError('You need to be logged in');
     }
   }
-
-
 };
 
 module.exports = resolvers;
